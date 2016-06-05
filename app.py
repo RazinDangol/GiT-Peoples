@@ -12,7 +12,9 @@ from flask import (Flask, render_template,
 # app is instance of Flask class
 
 app = Flask(__name__)
-app.secret_key = "123567"
+
+# Setting secret key for session management
+app.secret_key = "some_secret_key"
 
 
 def get_connection():
@@ -59,7 +61,7 @@ def add_people():
         cur = db_conn.cursor()
         # save data to database
         # redirect to list page
-        print('>' * 5, request.form)
+        
         firstname = request.form['firstname']
         lastname = request.form['lastname']
         address = request.form['address']
@@ -108,6 +110,7 @@ def update_people(pid):
     """
     db_conn = get_connection()
     cur = db_conn.cursor()
+
     if request.method == 'GET':
         get_sql = """SELECT 
                     id, firstname, lastname, address, country 
@@ -120,7 +123,9 @@ def update_people(pid):
         else:
             flash("Sorry! Couldn't get user with id {}".format(pid))
             return redirect(url_for('list_people'))
-    elif request.method == 'POST':
+
+    elif request.method == 'POST': # or use just else: because out of two accepted methods 
+    # if one is GET then the other accepted method is obiviously POST
         firstname = request.form['firstname']
         lastname = request.form['lastname']
         address = request.form['address']
@@ -143,21 +148,29 @@ def update_people(pid):
 
 @app.route("/delete/<int:pid>", methods=['GET'])
 def delete_people(pid):
+    """
+    deletes record of people with given id/pid
+    """
     db_conn = get_connection()
     cur = db_conn.cursor()
-    _sql = """SELECT id,firstname,lastname,address,country
+    _sql = """SELECT 
+    id,firstname,lastname,address,country
     FROM peoples where id = ?"""
     cur.execute(_sql, (pid,))
     record = cur.fetchone()
+
     if record:
         delete_sql = """DELETE FROM peoples where id = ?"""
         cur.execute(delete_sql, (pid,))
         db_conn.commit()
         flash("Record with id {} deleted successfully!!!".format(pid))
         return redirect(url_for('list_people'))
+
     else:
         flash("Sorry! No user with id {} found to delete".format(pid))
         return redirect(url_for("list_people"))
+
+
 # @app.route('/hello/<name>')
 # @app.route('/hello')
 # def hello(name):
