@@ -6,12 +6,13 @@ Simple flask based application
 import sqlite3
 # import Flask class from flask module
 from flask import (Flask, render_template,
-                   request, redirect, url_for)
+                   request, redirect, url_for, flash)
 
 
 # app is instance of Flask class
-print(__name__)
+
 app = Flask(__name__)
+app.secret_key = "123567"
 
 
 def get_connection():
@@ -76,6 +77,7 @@ VALUES(?, ?, ?, ?)'''
                 country.strip()
             ))
             db_conn.commit()
+            flash("Record added successfully!")
             return redirect(url_for('list_people'))
     return render_template('add.jinja2')
 
@@ -114,10 +116,10 @@ def update_people(pid):
         record = cur.fetchone()  # fetches the top most row
         # Check if the given user id exists in our database
         if record:
-            # passing record so that it can be used as input's default value
-            return render_template('update.jinja2', data=record) 
+            return render_template('update.jinja2', data=record)
         else:
-            return "Sorry! No user profile found with given id"
+            flash("Sorry! Couldn't get user with id {}".format(pid))
+            return redirect(url_for('list_people'))
     elif request.method == 'POST':
         firstname = request.form['firstname']
         lastname = request.form['lastname']
@@ -135,7 +137,27 @@ def update_people(pid):
                 pid
             ))
             db_conn.commit()
+            flash("Record with id {} updated successfully!!!".format(pid))
             return redirect(url_for('list_people'))
+
+
+@app.route("/delete/<int:pid>", methods=['GET'])
+def delete_people(pid):
+    db_conn = get_connection()
+    cur = db_conn.cursor()
+    _sql = """SELECT id,firstname,lastname,address,country
+    FROM peoples where id = ?"""
+    cur.execute(_sql, (pid,))
+    record = cur.fetchone()
+    if record:
+        delete_sql = """DELETE FROM peoples where id = ?"""
+        cur.execute(delete_sql, (pid,))
+        db_conn.commit()
+        flash("Record with id {} deleted successfully!!!".format(pid))
+        return redirect(url_for('list_people'))
+    else:
+        flash("Sorry! No user with id {} found to delete".format(pid))
+        return redirect(url_for("list_people"))
 # @app.route('/hello/<name>')
 # @app.route('/hello')
 # def hello(name):
