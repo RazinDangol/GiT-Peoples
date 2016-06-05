@@ -1,0 +1,14 @@
+{% extends 'layout.jinja2' %}
+
+{% block main %}
+<div class="jumbotron">
+  <h1>Hello, world!</h1>
+  <p>...</p>
+  <p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('add_people') }}" role="button">Add New</a>
+  </p>
+  <p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('list_people') }}" role="button">Show All</a>
+  </p>
+</div>
+{% endblock %}

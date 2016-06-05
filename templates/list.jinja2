@@ -1,0 +1,31 @@
+{% extends 'layout.jinja2' %}
+
+{% block main %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>S.N</th>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Address</th>
+            <th>Country</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        {% for row in data %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row.3 }}</td>
+            <td>{{ row.4 }}</td>
+            <td>
+                <a href="{{ url_for('update_people', pid=row.0)}}">Edit</a> | Delete</td>
+        </tr>
+        {% endfor %}
+        
+    </tbody>
+</table>
+{% endblock %}
