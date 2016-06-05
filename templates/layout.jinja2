@@ -36,6 +36,16 @@
     </nav>
 
     <div class="container">
+        {% with flashed_messages = get_flashed_messages() %}
+        {% if flashed_messages %}
+          {% for message in flashed_messages %}
+          <div class="alert alert-info">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            {{ message }}
+          </div>
+          {% endfor %}
+        {% endif %}
+        {% endwith %}
         {% block main %}{% endblock %}
     </div>
 
