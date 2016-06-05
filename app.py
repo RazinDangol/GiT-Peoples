@@ -5,7 +5,7 @@ Simple flask based application
 
 import sqlite3
 # import Flask class from flask module
-from flask import (Flask, render_template, 
+from flask import (Flask, render_template,
                    request, redirect, url_for)
 
 
@@ -52,13 +52,13 @@ def add_people():
     """
     add new people
     """
-    print('*'*5, request.method)
+    print('*' * 5, request.method)
     if request.method == 'POST':
         db_conn = get_connection()
         cur = db_conn.cursor()
         # save data to database
         # redirect to list page
-        print('>'*5, request.form)
+        print('>' * 5, request.form)
         firstname = request.form['firstname']
         lastname = request.form['lastname']
         address = request.form['address']
@@ -96,7 +96,7 @@ def list_people():
                            data=records)
 
 
-@app.route('/update/<int:pid>')
+@app.route('/update/<int:pid>', methods=['GET', 'POST'])
 def update_people(pid):
     """
     should update any people by given id
@@ -104,9 +104,38 @@ def update_people(pid):
     update peoples set firstname=?, lastname=?
         address=?, country=? where id=pid
     """
-    pass
-
-
+    db_conn = get_connection()
+    cur = db_conn.cursor()
+    if request.method == 'GET':
+        get_sql = """SELECT 
+                    id, firstname, lastname, address, country 
+                    FROM peoples WHERE id = ?"""
+        cur.execute(get_sql, (pid,))
+        record = cur.fetchone()  # fetches the top most row
+        # Check if the given user id exists in our database
+        if record:
+            # passing record so that it can be used as input's default value
+            return render_template('update.jinja2', data=record) 
+        else:
+            return "Sorry! No user profile found with given id"
+    elif request.method == 'POST':
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
+        address = request.form['address']
+        country = request.form['country']
+        if firstname.strip():
+            post_sql = """UPDATE 
+                        peoples set firstname=?, lastname=?, address=?, country=? 
+                        where id=?"""
+            cur.execute(post_sql, (
+                firstname.strip(),
+                lastname.strip(),
+                address.strip(),
+                country.strip(),
+                pid
+            ))
+            db_conn.commit()
+            return redirect(url_for('list_people'))
 # @app.route('/hello/<name>')
 # @app.route('/hello')
 # def hello(name):
